@@ -1,0 +1,72 @@
+########################################################################
+# Example variables — copy to terraform.tfvars and adjust.
+########################################################################
+
+# Subscription that resources deploy into (or set ARM_SUBSCRIPTION_ID).
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+location    = "swedencentral"
+name_prefix = "pfa"
+
+# Foundry agent setup: true = Standard (BYO Storage/Cosmos/Search),
+# false = Basic (platform-managed data, no BYO data resources).
+byo_data = true
+
+# Foundry inbound access: false = private ingress (private endpoint),
+# true = public ingress. Egress is always private via VNet injection.
+foundry_public_network_access = false
+
+########################################################################
+# Network — create everything (default) OR bring your own.
+########################################################################
+
+# Create the VNet, subnets and Private DNS zones.
+create_network                         = true
+virtual_network_address_space          = "192.168.0.0/16"
+agent_subnet_address_prefix            = "192.168.0.0/24"
+private_endpoint_subnet_address_prefix = "192.168.1.0/24"
+aca_subnet_address_prefix              = "192.168.2.0/27"
+
+# --- BYO network (set create_network = false and fill these in) ----------
+# subnet_id_agent            = "/subscriptions/.../subnets/snet-agent"
+# subnet_id_private_endpoint = "/subscriptions/.../subnets/snet-pe"
+# subnet_id_aca              = "/subscriptions/.../subnets/snet-aca"
+# vnet_id                    = "/subscriptions/.../virtualNetworks/my-vnet"
+# subscription_id_infra      = "11111111-1111-1111-1111-111111111111"
+# private_dns_zone_ids = {
+#   cognitiveservices = "/subscriptions/.../privateDnsZones/privatelink.cognitiveservices.azure.com"
+#   openai            = "/subscriptions/.../privateDnsZones/privatelink.openai.azure.com"
+#   ai_services       = "/subscriptions/.../privateDnsZones/privatelink.services.ai.azure.com"
+#   blob              = "/subscriptions/.../privateDnsZones/privatelink.blob.core.windows.net"
+#   search            = "/subscriptions/.../privateDnsZones/privatelink.search.windows.net"
+#   cosmos            = "/subscriptions/.../privateDnsZones/privatelink.documents.azure.com"
+# }
+
+########################################################################
+# Foundry model deployment
+########################################################################
+
+model_deployment = [{
+  name         = "gpt-4o"
+  format       = "OpenAI"
+  model_name   = "gpt-4o"
+  version      = "2024-11-20"
+  sku_name     = "GlobalStandard"
+  sku_capacity = 200
+}]
+
+########################################################################
+# Azure MCP Server
+########################################################################
+
+# Empty = all namespaces enabled. Provide up to 3 to restrict, e.g.
+# mcp_namespaces = ["storage", "monitor"]
+mcp_namespaces = []
+mcp_read_only  = true
+
+enable_application_insights = true
+entra_app_display_name      = "azure-mcp-server"
+
+# Baseline outbound access for MCP tool calls (read-only Reader on the RG).
+# Add any further roles manually as needed.
+mcp_grant_rg_reader = true
