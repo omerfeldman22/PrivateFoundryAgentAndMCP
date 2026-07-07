@@ -38,7 +38,7 @@ resource "azurerm_virtual_network" "vnet" {
 
   name                = "vnet-agents"
   location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   address_space       = [var.virtual_network_address_space]
 }
 
@@ -48,7 +48,7 @@ resource "azurerm_subnet" "subnet_agent" {
   count = var.create_network ? 1 : 0
 
   name                 = "snet-agent"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = local.rg_name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
   address_prefixes     = [var.agent_subnet_address_prefix]
 
@@ -66,7 +66,7 @@ resource "azurerm_subnet" "subnet_pe" {
   count = var.create_network ? 1 : 0
 
   name                 = "snet-pe"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = local.rg_name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
   address_prefixes     = [var.private_endpoint_subnet_address_prefix]
 }
@@ -77,7 +77,7 @@ resource "azurerm_subnet" "subnet_aca" {
   count = var.create_network ? 1 : 0
 
   name                 = "snet-aca"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = local.rg_name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
   address_prefixes     = [var.aca_subnet_address_prefix]
 
@@ -98,14 +98,14 @@ resource "azurerm_private_dns_zone" "plz" {
   for_each = var.create_network ? local.private_dns_zones : {}
 
   name                = each.value
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "plz" {
   for_each = var.create_network ? local.private_dns_zones : {}
 
   name                  = "${each.key}-link"
-  resource_group_name   = azurerm_resource_group.rg.name
+  resource_group_name   = local.rg_name
   private_dns_zone_name = azurerm_private_dns_zone.plz[each.key].name
   virtual_network_id    = azurerm_virtual_network.vnet[0].id
   registration_enabled  = false

@@ -8,7 +8,7 @@ resource "azapi_resource" "ai_search" {
 
   type                      = "Microsoft.Search/searchServices@2025-05-01"
   name                      = local.search_name
-  parent_id                 = azurerm_resource_group.rg.id
+  parent_id                 = local.rg_id
   location                  = var.location
   schema_validation_enabled = true
 
@@ -51,7 +51,7 @@ resource "azurerm_private_endpoint" "pe_aisearch" {
 
   name                = "${azapi_resource.ai_search[0].name}-pe"
   location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   subnet_id           = local.pe_subnet_id
 
   private_service_connection {

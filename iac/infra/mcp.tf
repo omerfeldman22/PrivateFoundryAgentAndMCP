@@ -76,7 +76,7 @@ locals {
 resource "azurerm_container_app_environment" "mcp" {
   name                           = local.mcp_env_name
   location                       = var.location
-  resource_group_name            = azurerm_resource_group.rg.name
+  resource_group_name            = local.rg_name
   infrastructure_subnet_id       = local.aca_subnet_id
   internal_load_balancer_enabled = true
   log_analytics_workspace_id     = var.enable_application_insights ? azurerm_log_analytics_workspace.law[0].id : null
@@ -97,20 +97,20 @@ resource "azurerm_container_app_environment" "mcp" {
 
 resource "azurerm_private_dns_zone" "aca_env" {
   name                = azurerm_container_app_environment.mcp.default_domain
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
 }
 
 resource "azurerm_private_dns_a_record" "aca_env_wildcard" {
   name                = "*"
   zone_name           = azurerm_private_dns_zone.aca_env.name
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   ttl                 = 300
   records             = [azurerm_container_app_environment.mcp.static_ip_address]
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "aca_env" {
   name                  = "aca-env-link"
-  resource_group_name   = azurerm_resource_group.rg.name
+  resource_group_name   = local.rg_name
   private_dns_zone_name = azurerm_private_dns_zone.aca_env.name
   virtual_network_id    = local.dns_link_vnet_id
   registration_enabled  = false
@@ -123,7 +123,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "aca_env" {
 resource "azurerm_container_app" "mcp" {
   name                         = local.mcp_app_name
   container_app_environment_id = azurerm_container_app_environment.mcp.id
-  resource_group_name          = azurerm_resource_group.rg.name
+  resource_group_name          = local.rg_name
   revision_mode                = "Single"
   workload_profile_name        = "Consumption"
 
@@ -230,7 +230,7 @@ resource "azurerm_container_app" "mcp" {
 resource "azurerm_role_assignment" "mcp_rg_reader" {
   count = var.mcp_grant_rg_reader ? 1 : 0
 
-  scope                = azurerm_resource_group.rg.id
+  scope                = local.rg_id
   role_definition_name = "Reader"
   principal_id         = azurerm_container_app.mcp.identity[0].principal_id
 }

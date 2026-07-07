@@ -8,7 +8,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb" {
 
   name                = local.cosmos_name
   location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
 
   offer_type        = "Standard"
   kind              = "GlobalDocumentDB"
@@ -41,7 +41,7 @@ resource "azurerm_private_endpoint" "pe_cosmosdb" {
 
   name                = "${azurerm_cosmosdb_account.cosmosdb[0].name}-pe"
   location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   subnet_id           = local.pe_subnet_id
 
   private_service_connection {
@@ -66,7 +66,7 @@ resource "azurerm_private_endpoint" "pe_cosmosdb" {
 resource "azurerm_role_assignment" "cosmosdb_operator" {
   count = var.byo_data ? 1 : 0
 
-  name                 = uuidv5("dns", "${local.project_name}${local.project_principal_id}${azurerm_resource_group.rg.name}cosmosdboperator")
+  name                 = uuidv5("dns", "${local.project_name}${local.project_principal_id}${local.rg_name}cosmosdboperator")
   scope                = azurerm_cosmosdb_account.cosmosdb[0].id
   role_definition_name = "Cosmos DB Operator"
   principal_id         = local.project_principal_id
@@ -80,7 +80,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "project_cosmos_data_contributor
   count = var.byo_data ? 1 : 0
 
   name                = uuidv5("dns", "${local.project_name}${local.project_principal_id}cosmosdbsqlrole")
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   account_name        = azurerm_cosmosdb_account.cosmosdb[0].name
   scope               = azurerm_cosmosdb_account.cosmosdb[0].id
   role_definition_id  = "${azurerm_cosmosdb_account.cosmosdb[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"

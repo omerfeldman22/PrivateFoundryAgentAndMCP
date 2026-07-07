@@ -7,7 +7,7 @@ resource "azurerm_storage_account" "storage_account" {
   count = var.byo_data ? 1 : 0
 
   name                = local.storage_name
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   location            = var.location
 
   account_kind             = "StorageV2"
@@ -35,7 +35,7 @@ resource "azurerm_private_endpoint" "pe_storage" {
 
   name                = "${azurerm_storage_account.storage_account[0].name}-pe"
   location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  resource_group_name = local.rg_name
   subnet_id           = local.pe_subnet_id
 
   private_service_connection {

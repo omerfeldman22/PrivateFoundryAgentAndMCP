@@ -23,6 +23,12 @@ variable "name_prefix" {
   }
 }
 
+variable "existing_resource_group_name" {
+  description = "If set, deploy all resources into this pre-existing resource group (e.g. the RG that holds a BYO VNet) instead of creating rg-<name_prefix>. Leave empty to create a new resource group."
+  type        = string
+  default     = ""
+}
+
 ########################################################################
 # Foundry agent setup
 ########################################################################
@@ -126,11 +132,11 @@ variable "vnet_id" {
 }
 
 variable "private_dns_zone_ids" {
-  description = "Map of pre-existing Private DNS zone resource IDs when create_network = false. Keys: cognitiveservices, openai, ai_services, blob, search, cosmos."
+  description = "Map of pre-existing Private DNS zone resource IDs when create_network = false. Data-plane keys (blob, search, cosmos) are required when byo_data = true. The Foundry ingress keys (cognitiveservices, openai, ai_services) are only used when foundry_public_network_access = false, so they are optional and may be omitted for public ingress."
   type = object({
-    cognitiveservices = string
-    openai            = string
-    ai_services       = string
+    cognitiveservices = optional(string)
+    openai            = optional(string)
+    ai_services       = optional(string)
     blob              = string
     search            = string
     cosmos            = string

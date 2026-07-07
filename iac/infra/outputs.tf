@@ -5,7 +5,7 @@ data "external" "foundry_portal_url" {
 
   query = {
     subscription_id = data.azurerm_client_config.current.subscription_id
-    resource_group  = azurerm_resource_group.rg.name
+    resource_group  = local.rg_name
     account         = local.foundry_name
     project         = local.project_name
     agent           = var.agent_name
